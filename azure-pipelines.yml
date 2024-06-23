@@ -1,0 +1,47 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  AZURE_APP_NAME: 'your-app-service-name'
+  AZURE_RESOURCE_GROUP: 'your-resource-group'
+  POETRY_VERSION: '1.1.8'
+
+jobs:
+- job: DeployProwlerDashboard
+  displayName: 'Deploy Prowler Dashboard'
+  steps:
+  - checkout: self
+    displayName: 'Checkout code'
+
+  - script: |
+      sudo apt-get update
+      sudo apt-get install -y python3-pip
+      pip3 install poetry==$(POETRY_VERSION)
+    displayName: 'Install Poetry'
+
+  - script: |
+      poetry install --with dev
+      poetry shell
+    displayName: 'Install dependencies with Poetry'
+
+  - script: |
+      cd prowler
+      AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) poetry run prowler aws -M json > prowler-output.json
+    displayName: 'Run Prowler AWS Scan'
+    env:
+      AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+      AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: 'prowler/prowler-output.json'
+      ArtifactName: 'ProwlerResults'
+    displayName: 'Publish Prowler Results'
