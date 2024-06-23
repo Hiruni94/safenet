@@ -10,9 +10,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  AZURE_APP_NAME: 'your-app-service-name'
-  AZURE_RESOURCE_GROUP: 'your-resource-group'
-  POETRY_VERSION: '1.1.8'
+  AZURE_APP_NAME: 'safenetapp'
+  AZURE_RESOURCE_GROUP: 'safenet'
+  POETRY_VERSION: '1.8.3'
 
 jobs:
 - job: DeployProwlerDashboard
